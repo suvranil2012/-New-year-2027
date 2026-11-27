@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Gate of Dawn · Happy New Year</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;500&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#f6efe3;--dim:rgba(252,247,238,.92);--glass:rgba(6,10,26,.58);--edge:rgba(255,255,255,.22);--gold:#ffc27a;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root{--ink:#f6efe3}}
+html,body{height:100%;margin:0;background:#02040a;overflow:hidden;color:var(--ink);font-family:Inter,system-ui,sans-serif}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+.top{position:fixed;top:calc(env(safe-area-inset-top,0px) + 18px);left:0;right:0;text-align:center;letter-spacing:.5em;font-size:11px;text-transform:uppercase;color:#fff;text-shadow:0 1px 12px rgba(0,0,0,.9),0 0 24px rgba(0,0,0,.6);pointer-events:none}
+#year{font-family:"Cormorant Garamond",Georgia,serif;font-weight:300;font-size:clamp(64px,16vw,150px);line-height:1;letter-spacing:.08em;display:block;margin-top:10px;color:var(--ink);text-shadow:0 0 40px rgba(255,190,120,.35),0 10px 40px rgba(0,0,0,.6);text-shadow:0 0 40px rgba(255,190,120,.45),0 2px 18px rgba(0,0,0,.85),0 10px 50px rgba(0,0,0,.7);transition:filter 1.5s cubic-bezier(.4,0,.2,1),opacity 1.5s cubic-bezier(.4,0,.2,1),transform 1.5s cubic-bezier(.4,0,.2,1)}
+#year.swap{filter:blur(18px);opacity:0;transform:scale(1.15)}
+.card{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 28px);transform:translateX(-50%);width:min(440px,calc(100% - 36px));padding:24px 26px;border-radius:26px;background:var(--glass);border:1px solid var(--edge);backdrop-filter:blur(22px) saturate(1.4);-webkit-backdrop-filter:blur(22px) saturate(1.4);box-shadow:0 30px 80px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.25);text-align:center;transition:opacity 1.3s cubic-bezier(.4,0,.2,1),transform 1.3s cubic-bezier(.4,0,.2,1),filter 1.3s cubic-bezier(.4,0,.2,1)}
+.card.hide{opacity:0;transform:translateX(-50%) translateY(30px) scale(.97);filter:blur(16px);pointer-events:none}
+h1{font-family:"Cormorant Garamond",Georgia,serif;font-weight:500;font-size:35px;margin:0 0 8px;letter-spacing:.02em;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.8)}
+p{margin:0 0 20px;font-weight:400;color:var(--dim);font-size:15.5px;line-height:1.55;text-shadow:0 1px 10px rgba(0,0,0,.8)}
+button,input{font:inherit;color:var(--ink)}
+button{cursor:pointer;border:1px solid rgba(255,200,130,.55);background:linear-gradient(180deg,rgba(255,200,130,.28),rgba(255,150,80,.12));padding:13px 28px;border-radius:99px;letter-spacing:.14em;text-transform:uppercase;font-size:12px;box-shadow:0 0 30px rgba(255,170,90,.3);transition:transform .2s,box-shadow .2s}
+button:hover{transform:translateY(-2px);box-shadow:0 0 46px rgba(255,170,90,.55)}
+form{display:flex;gap:8px}
+input{flex:1;min-width:0;background:rgba(0,0,0,.25);border:1px solid var(--edge);border-radius:99px;padding:12px 18px;outline:none;font-size:14px}
+input::placeholder{color:var(--dim)}
+form button{padding:12px 18px}
+.wish{position:fixed;left:50%;bottom:30%;transform:translateX(-50%);font-family:"Cormorant Garamond",Georgia,serif;font-size:26px;color:#ffe2b8;white-space:nowrap;pointer-events:none;text-shadow:0 0 18px #ffa84d,0 0 50px #ff7a2a;animation:rise 7s ease-out forwards}
+@keyframes rise{0%{opacity:0;transform:translate(-50%,40px) scale(.8);filter:blur(6px)}15%{opacity:1;filter:blur(0)}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),-46vh) scale(1.2);filter:blur(5px)}}
+.veil{position:fixed;inset:0;pointer-events:none;-webkit-backdrop-filter:blur(0px);backdrop-filter:blur(0px);transition:backdrop-filter 1.5s cubic-bezier(.4,0,.2,1),-webkit-backdrop-filter 1.5s cubic-bezier(.4,0,.2,1)}
+.veil.on{-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.hint{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 6px);width:100%;text-align:center;font-size:10px;letter-spacing:.3em;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.9);opacity:.75;pointer-events:none}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="veil" id="veil"></div>
+<div class="top">Farewell · Welcome<span id="year">2026</span></div>
+
+<div class="card" id="start">
+  <h1>Every dawn is a door.</h1>
+  <p>The year behind you has gone quiet. Something new is waiting on the other side of the light.</p>
+  <button id="go">Open the Gate</button>
+</div>
+<div class="card hide" id="wishCard">
+  <h1>Happy New Year.</h1>
+  <p>Whisper one hope into the light. Tap anywhere to send ripples across the water.</p>
+  <form id="f"><input id="w" maxlength="40" placeholder="My hope for this year…" autocomplete="off"><button>Release</button></form>
+</div>
+<div class="hint">Move to look around · tap to ripple</div>
+
+<script>
+const cv=document.getElementById('c');
+const gl=cv.getContext('webgl',{antialias:false});
+const VS='attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}';
+const FS=`precision highp float;
+uniform vec2 uRes,uM;uniform float uT,uD,uP;
+vec3 SD;
+float hash(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
+float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
+ return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);}
+float H(vec2 p){
+ float h=.07*sin(p.x*1.2+uT*1.1)+.05*sin(p.y*1.6-uT*1.3+p.x*.5)+.035*noise(p*3.+uT*.4);
+ float r=length(p-vec2(0.,-8.));
+ h+=.16*sin(r*4.)*exp(-pow(r-uP*4.,2.)*.12)*exp(-uP*.3);
+ return h;}
+const vec3 GC=vec3(0.,2.3,-8.);const float GR=2.2;
+vec3 gate(vec3 ro,vec3 rd,float tmax){
+ vec3 gc=mix(vec3(.35,.7,1.),vec3(1.,.72,.32),uD);
+ float I=.5+uD*1.6+exp(-uP*1.2)*2.;
+ vec3 g=vec3(0.);float t=0.;
+ for(int i=0;i<48;i++){
+  vec3 p=ro+rd*t-GC;
+  float an=atan(p.y,p.x);
+  vec2 q=vec2(length(p.xy)-GR,p.z);
+  float d=length(q)-.1-.035*sin(an*12.+uT*2.);
+  float st=max(d*.8,.03);
+  g+=gc*I*.006*st/(.01+d*d);
+  if(d<.004){g+=gc*I*1.4;break;}
+  t+=st;if(t>tmax)break;}
+ float t0=(GC.z-ro.z)/rd.z;
+ if(t0>0.&&t0<tmax){
+  vec3 p=ro+rd*t0-GC;float r=length(p.xy);
+  if(r<GR){
+   float a=atan(p.y,p.x);
+   float n=noise(vec2(a*2.+uT*.3,r*3.-uT*.5));
+   vec3 pc=mix(vec3(.15,.25,.6),vec3(1.,.55,.25),uD);
+   g+=pc*(.06+.4*n)*(.3+uD)*(.3+smoothstep(.2,GR,r)*1.4);}}
+ return g;}
+vec3 sky(vec3 rd){
+ float y=max(rd.y,0.);
+ vec3 hz=mix(vec3(.04,.07,.16),vec3(1.,.48,.28),uD);
+ vec3 zn=mix(vec3(.005,.01,.04),vec3(.07,.15,.4),uD);
+ vec3 c=mix(hz,zn,pow(y,.45));
+ vec2 su=vec2(atan(rd.x,rd.z),asin(clamp(rd.y,-1.,1.)))*60.;
+ float h=hash(floor(su));
+ c+=step(.965,h)*smoothstep(.35,0.,length(fract(su)-.5))*(.6+.4*sin(uT*3.+h*60.))*(1.-uD)*step(0.,rd.y)*vec3(.8,.9,1.);
+ float s=max(dot(rd,SD),0.);
+ c+=vec3(1.,.78,.45)*(smoothstep(.9993,.9997,s)*5.+pow(s,80.)*.9+pow(s,6.)*.3)*(.2+uD);
+ return c;}
+vec3 embers(vec2 uv){
+ vec3 c=vec3(0.);
+ for(int i=0;i<3;i++){
+  float s=1.+float(i)*.8;
+  vec2 p=uv*s*7.;p.y-=uT*.25*s;
+  vec2 id=floor(p),f=fract(p)-.5;
+  float h=hash(id+float(i)*13.);
+  vec2 off=(vec2(hash(id+3.),hash(id+7.))-.5)*.6;off.x+=sin(uT+h*6.)*.12;
+  float d=length(f-off);
+  c+=vec3(1.,.62,.28)*.0016/(d*d+.0016)*step(.75,h)*(.5+.5*sin(uT*2.+h*20.))*(.25+uD)/s;}
+ return c;}
+void main(){
+ vec2 uv=(gl_FragCoord.xy-.5*uRes)/uRes.y;
+ float e=smoothstep(0.,1.,uD);
+ vec3 ro=vec3(0.,1.2,3.-e*3.5);
+ vec3 ta=vec3(uM.x*1.6,1.6+e*.6+uM.y*.8,-8.);
+ vec3 f=normalize(ta-ro),r=normalize(cross(f,vec3(0.,1.,0.))),u=cross(r,f);
+ vec3 rd=normalize(f*1.4+r*uv.x+u*uv.y);
+ SD=normalize(vec3(0.,mix(-4.,5.,e),-40.)-ro);
+ vec3 col;
+ if(rd.y<-.001){
+  float t=-ro.y/rd.y;
+  for(int i=0;i<3;i++){vec3 p=ro+rd*t;t+=(p.y-H(p.xz))/(-rd.y);}
+  vec3 p=ro+rd*t;vec2 ee=vec2(.05,0.);
+  vec3 n=normalize(vec3(H(p.xz-ee.xy)-H(p.xz+ee.xy),.1,H(p.xz-ee.yx)-H(p.xz+ee.yx)));
+  vec3 rf=reflect(rd,n);rf.y=abs(rf.y);
+  float fr=.02+.98*pow(1.-max(dot(-rd,n),0.),5.);
+  vec3 rc=sky(rf)+gate(p,rf,40.);
+  vec3 deep=mix(vec3(.005,.015,.04),vec3(.02,.07,.11),uD);
+  col=mix(deep,rc,clamp(fr*1.3+.1,0.,1.));
+  col=mix(col,sky(normalize(vec3(rd.x,0.,rd.z)))*.8,1.-exp(-t*.02));
+  col+=gate(ro,rd,t);
+ }else col=sky(rd)+gate(ro,rd,60.);
+ col+=embers(uv);
+ float rr=length(uv-vec2(0.,.1));
+ col+=vec3(1.,.8,.5)*exp(-pow((rr-uP*.55)*7.,2.))*exp(-uP*.9)*.6;
+ col=1.-exp(-col*1.25);
+ col=pow(col,vec3(.4545));
+ col*=1.-.55*dot(uv,uv);
+ col+=(hash(gl_FragCoord.xy+uT)-.5)*.03;
+ gl_FragColor=vec4(col,1.);}`;
+function sh(t,s){const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))console.error(gl.getShaderInfoLog(o));return o}
+const pg=gl.createProgram();gl.attachShader(pg,sh(gl.VERTEX_SHADER,VS));gl.attachShader(pg,sh(gl.FRAGMENT_SHADER,FS));gl.linkProgram(pg);gl.useProgram(pg);
+const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+const al=gl.getAttribLocation(pg,'a');gl.enableVertexAttribArray(al);gl.vertexAttribPointer(al,2,gl.FLOAT,false,0,0);
+const U=n=>gl.getUniformLocation(pg,n);const uRes=U('uRes'),uT=U('uT'),uD=U('uD'),uP=U('uP'),uM=U('uM');
+function size(){const d=Math.min(devicePixelRatio||1,1.5);cv.width=innerWidth*d;cv.height=innerHeight*d;gl.viewport(0,0,cv.width,cv.height)}
+addEventListener('resize',size);size();
+let dawn=0,opening=false,pulseAt=-99,mx=0,my=0,sx=0,sy=0,last=performance.now(),t0=last;
+function ping(){pulseAt=(performance.now()-t0)/1000}
+addEventListener('pointermove',e=>{mx=e.clientX/innerWidth*2-1;my=-(e.clientY/innerHeight*2-1)});
+cv.addEventListener('pointerdown',()=>{if(dawn>.3)ping()});
+const $=id=>document.getElementById(id);
+const veil=$('veil'),blurPulse=()=>{veil.classList.add('on');setTimeout(()=>veil.classList.remove('on'),1500)};
+$('go').onclick=()=>{blurPulse();
+  opening=true;ping();$('start').classList.add('hide');
+  setTimeout(()=>{const y=$('year');blurPulse();y.classList.add('swap');setTimeout(()=>{y.textContent='2027';y.classList.remove('swap')},1200)},5200);
+  setTimeout(()=>$('wishCard').classList.remove('hide'),9000);
+};
+$('f').onsubmit=e=>{e.preventDefault();const v=$('w').value.trim();if(!v)return;
+  const d=document.createElement('div');d.className='wish';d.textContent=v;d.style.setProperty('--dx',(Math.random()*120-60)+'px');
+  document.body.appendChild(d);setTimeout(()=>d.remove(),7200);$('w').value='';ping()};
+(function loop(now){
+  const dt=Math.min((now-last)/1000,.1);last=now;
+  if(opening)dawn=Math.min(1,dawn+dt/11);
+  sx+=(mx-sx)*dt*2;sy+=(my-sy)*dt*2;
+  const t=(now-t0)/1000;
+  gl.uniform2f(uRes,cv.width,cv.height);gl.uniform1f(uT,t);gl.uniform1f(uD,dawn);
+  gl.uniform1f(uP,Math.min(t-pulseAt,99));gl.uniform2f(uM,sx,sy);
+  gl.drawArrays(gl.TRIANGLES,0,3);requestAnimationFrame(loop)})(last);
+</script>
+</body>
+</html>
