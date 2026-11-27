@@ -1,2 +1,12 @@
 # -New-year-2027
-It's not just a starting of a year it's beginning of a new journey 
+Farewell · Welcome2026
+
+# Every dawn is a door.
+
+The year behind you has gone quiet. Something new is waiting on the other side of the light.
+
+# Happy New Year.
+
+Whisper one hope into the light. Tap anywhere to send ripples across the water.
+
+Move to look around · tap to ripple
